@@ -14,7 +14,7 @@ services:
       - ithriv_network
     command: "curl http://ithriv_web:4200"
   ithriv_es:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
     container_name: ithriv_es
     environment:
       - discovery.type=single-node
