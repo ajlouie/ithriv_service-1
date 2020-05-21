@@ -4,6 +4,7 @@ branches:
     - master
     - /^release-.*$/
     - /^hotfix-.*$/
+    - /^*$/
 
 language: bash
 
@@ -35,9 +36,11 @@ install:
     docker push ithriv/ithriv_service:latest || exit 1 ;
     git tag $GIT_TAG -a -m "Generated tag from TravisCI for build $TRAVIS_BUILD_NUMBER" || exit 1 ;
     else
+    #Following temp
+    export BUILD_ENV="dev" || exit 1 ;
     docker build --build-arg BUILD_ENV --build-arg ES_ENV_HOST -f docker/Dockerfile --no-cache -t ithriv/ithriv_service:"$TRAVIS_BRANCH" . || exit 1 ;
     docker push ithriv/ithriv_service:"$TRAVIS_BRANCH" || exit 1 ;
-    aws sqs send-message --queue-url 'https://queue.amazonaws.com/474683445819/ithriv-updates' --message-body ithriv/ithriv_service:$TRAVIS_BRANCH || exit 1;
+    #aws sqs send-message --queue-url 'https://queue.amazonaws.com/474683445819/ithriv-updates' --message-body ithriv/ithriv_service:$TRAVIS_BRANCH || exit 1;
     fi
 
 notifications:
