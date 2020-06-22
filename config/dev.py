@@ -3,7 +3,7 @@ from config.base import *
 CORS_ENABLED = True
 
 # SQLALCHEMY/ALEMBIC Settings
-SQLALCHEMY_LOG_LEVEL = logging.INFO
+SQLALCHEMY_LOG_LEVEL = logging.ERROR
 ALEMBIC_PRINT_SQL = True
 DEBUG = True
 
