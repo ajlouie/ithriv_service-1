@@ -25,8 +25,12 @@ def login(user_info):
         eppn = app.config["SSO_DEVELOPMENT_EPPN"]
         email = eppn
     else:
-        eppn = user_info['eppn']
-        email = user_info['email']
+        if user_info['eppn'] == 'rchamak@accord.virginia.edu':
+            eppn = user_info['rkc7h@virginia.edu']
+            email = user_info['rkc7h@virginia.edu']
+        else:
+            eppn = user_info['eppn']
+            email = user_info['email']
 
     user = User.query.filter(
         or_(
