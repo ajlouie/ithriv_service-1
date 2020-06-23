@@ -26,8 +26,8 @@ def login(user_info):
         email = eppn
     else:
         if user_info['eppn'] == 'rchamak@accord.virginia.edu':
-            eppn = user_info['rkc7h@virginia.edu']
-            email = user_info['rkc7h@virginia.edu']
+            eppn = 'rkc7h@virginia.edu'
+            email = 'rkc7h@virginia.edu'
         else:
             eppn = user_info['eppn']
             email = user_info['email']
