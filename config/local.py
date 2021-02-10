@@ -15,8 +15,8 @@ DEBUG = True
 
 # Single Signon configuration Settings
 SSO_ATTRIBUTE_MAP['uid'] = (False, 'uid')
-SSO_DEVELOPMENT_EPPN = 'ithriv_admin@virginia.edu'
-MAIL_CONSULT_RECIPIENT = 'rkc7h@virginia.edu'
+SSO_DEVELOPMENT_EPPN = 'ajl2j@virginia.edu'
+MAIL_CONSULT_RECIPIENT = 'ajl2j@virginia.edu'
 
 API_URL = 'http://localhost:5000'
 SITE_URL = 'http://localhost:4200'

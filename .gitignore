@@ -6,3 +6,4 @@ env
 /supervisord.log
 /pypy-env/
 /python-env/
+.idea

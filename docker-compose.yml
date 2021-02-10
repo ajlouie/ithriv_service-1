@@ -60,7 +60,7 @@ services:
     volumes:
       - ./app:/ithriv_service/app
       - ./config:/ithriv_service/config
-      - /private/etc/private/ithriv/connections.json:/etc/private/ithriv/connections.json
+      - /etc/private/ithriv/connections.json:/etc/private/ithriv/connections.json
       - ~/.aws/.:/root/.aws
       - ~/.aws/.:/home/.aws
       - ./nginx_app.conf:/etc/nginx/sites-available/default

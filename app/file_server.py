@@ -19,6 +19,7 @@ class FileServer:
 
     def save_icon(self, data, icon, file_extension, mime_type):
         path = "%s/ithriv/icon/%s.%s" % (self.base_path, icon.id, file_extension)
+        print('save_icon path', path)
         file_name = self._save_file(data, path, mime_type)
         return file_name
 
