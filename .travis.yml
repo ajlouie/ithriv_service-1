@@ -28,7 +28,7 @@ install:
     export BUILD_ENV="prod" || exit 1 ;
     fi
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
-    export GIT_TAG=prod-1.9.1 || exit 1 ;
+    export GIT_TAG=prod-2.0 || exit 1 ;
     docker build --build-arg BUILD_ENV --build-arg ES_ENV_HOST -f docker/Dockerfile --no-cache -t ithriv/ithriv_service:"$GIT_TAG" . || exit 1 ;
     docker push ithriv/ithriv_service:"$GIT_TAG" || exit 1 ;
     docker tag ithriv/ithriv_service:"$GIT_TAG" ithriv/ithriv_service:latest || exit 1 ;
