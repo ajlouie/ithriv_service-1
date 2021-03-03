@@ -1,9 +1,9 @@
 {
   "python.linting.flake8Enabled": true,
-  "python.linting.flake8Path": "env/bin/flake8",
+  "python.linting.flake8Path": "env39/bin/flake8",
   "python.linting.pylintEnabled": false,
   "python.linting.enabled": true,
   "python.formatting.provider": "autopep8",
-  "python.pythonPath": "env/bin/python",
-  "python.autoComplete.extraPaths": ["env/lib/python3.7/site-packages"]
+  "python.pythonPath": "env39/bin/python3",
+  "python.autoComplete.extraPaths": ["env39/lib/python3.7/site-packages"]
 }
