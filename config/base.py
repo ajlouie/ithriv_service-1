@@ -85,7 +85,7 @@ SSO_ATTRIBUTE_MAP = {
 SSO_LOGIN_URL = '/api/login'
 
 
-API_URL = ''.join(['https:///service.', conn_info['ENV'], '.ithriv.org'])
+API_URL = ''.join(['https://service.', conn_info['ENV'], '.ithriv.org'])
 SITE_URL = ''.join(['https://portal.', conn_info['ENV'], '.ithriv.org'])
 FRONTEND_AUTH_CALLBACK, FRONTEND_EMAIL_RESET, FRONTEND_EMAIL_CONFIRM = auth_callback_url_tuple(
     SITE_URL, '/#/session', '/#/reset_password/', '/#/login/')
