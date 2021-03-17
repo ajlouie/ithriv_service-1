@@ -98,8 +98,12 @@ class DataLoader:
                 extension = path.rsplit('.', 1)[1].lower()
                 mime_type = self.mime.from_file(path)
                 data = open(path, 'rb')
-                icon.url = file_server.save_icon(
-                    data, icon, extension, mime_type)
+
+                try:
+                    icon.url = file_server.save_icon(data, icon, extension, mime_type)
+                except Exception as e:
+                    print('unable to save icon.')
+
                 db.session.add(icon)
 
                 resource_type = self.get_type_by_name(
