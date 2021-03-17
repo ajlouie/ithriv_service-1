@@ -29,9 +29,14 @@ services:
     domainname: elasticsearch
   ithriv_db:
     image: postgres
-    volumes:
-      - ./init_db.sql:/docker-entrypoint-initdb.d/init.sql
     container_name: ithriv_db
+    volumes:
+      - $HOME/docker/volumes/ithriv:/var/lib/postgresql/data
+      - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+    environment:
+      - POSTGRES_USER=ed_user
+      - POSTGRES_PASSWORD=ed_pass
+      - POSTGRES_MULTIPLE_DATABASES="ithriv-local"
     ports:
       - 5432:5432
     networks:
