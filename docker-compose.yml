@@ -37,6 +37,8 @@ services:
       - POSTGRES_USER=ed_user
       - POSTGRES_PASSWORD=ed_pass
       - POSTGRES_MULTIPLE_DATABASES="ithriv-local"
+#    volumes:
+#      - ./init_db.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 5432:5432
     networks:
