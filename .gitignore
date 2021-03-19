@@ -7,3 +7,4 @@ env
 /pypy-env/
 /python-env/
 .idea
+.run
