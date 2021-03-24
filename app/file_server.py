@@ -10,17 +10,25 @@ class FileServer:
         self.base_path = app.config['S3']['base_path']
 
     def _save_file(self, data, filename, mime_type):
-        self.s3.Bucket(self.bucket).put_object(Key=filename, Body=data, ACL='public-read',
-                                               ContentType=mime_type)
-        return self._get_remote_path(filename)
+        try:
+            self.s3.Bucket(self.bucket).put_object(Key=filename, Body=data, ACL='public-read',
+                                                   ContentType=mime_type)
+            remote_path = self._get_remote_path(filename)
+            return remote_path
+        except Exception as e:
+            print('could not put file into AWS S3 bucket.')
 
     def _get_remote_path(self, filename):
         return "{0}/{1}/{2}".format(self.base_url, self.bucket, filename)
 
     def save_icon(self, data, icon, file_extension, mime_type):
         path = "%s/ithriv/icon/%s.%s" % (self.base_path, icon.id, file_extension)
-        file_name = self._save_file(data, path, mime_type)
-        return file_name
+        print('save_icon path', path)
+        try:
+            file_name = self._save_file(data, path, mime_type)
+            return file_name
+        except Exception as e:
+            print('could not save file.')
 
     def get_key(self, file):
         extension = file.file_name.split('.', 1)[1].lower()
