@@ -6,6 +6,9 @@ from app.models import User, EmailLog
 
 
 class TestUser(BaseTest):
+    def test_create_user_with_password(self):
+        self.create_user_with_password()
+
     def test_get_current_participant(self):
         """ Test for the current participant status """
         # Create the user
@@ -68,7 +71,7 @@ class TestUser(BaseTest):
     def test_user_email_is_case_insensitive(self):
         password = "s00p3rS3cur3"
         email = email="Darth.maul@sith.net"
-        user = self.test_logout_user(
+        user = self.logout_user(
             display_name="Darth Maul",
             eppn="DARTH.MAUL@sith.net",
             email=email,

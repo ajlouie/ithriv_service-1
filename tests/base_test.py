@@ -189,7 +189,7 @@ class BaseTest(unittest.TestCase):
                            owner="poe.resistance@rebels.org",
                            website="rebels.org",
                            cost='$100B credits',
-                           available_to=None,
+                           available_to='UVA',
                            contact_email='poe.resistance@rebels.org',
                            contact_phone='111-222-3333',
                            contact_notes='I have a bad feeling about this.',
@@ -404,7 +404,7 @@ class BaseTest(unittest.TestCase):
         return dict(
             Authorization='Bearer ' + db_user.encode_auth_token().decode())
 
-    def test_create_user_with_password(self, display_name="Peter Dinklage", eppn="tyrion@got.com",
+    def create_user_with_password(self, display_name="Peter Dinklage", eppn="tyrion@got.com",
                                        email="tyrion@got.com", role="User", password="peterpass"):
         data = {
             "display_name": display_name,
@@ -433,4 +433,41 @@ class BaseTest(unittest.TestCase):
         self.assertEqual(email, response["email"])
         self.assertEqual(role, response["role"])
         self.assertEqual(True, user.is_correct_password(password))
+        return user
+
+    def login_user(self, display_name="Kit Harington", eppn="jonsnow@got.com",
+                                       email="jonsnow@got.com", role="User", password="y0ukn0wn0th!ng"):
+        user = self.create_user_with_password(display_name=display_name, eppn=eppn,
+                                       email=email, role=role, password=password)
+        data = {"email": email, "password": password}
+
+        # Login shouldn't work with email not yet verified
+        rv = self.app.post(
+            '/api/login_password',
+            data=json.dumps(data),
+            content_type="application/json")
+        self.assertEqual(400, rv.status_code)
+
+        user.email_verified = True
+        rv = self.app.post(
+            '/api/login_password',
+            data=json.dumps(data),
+            content_type="application/json")
+        self.assertSuccess(rv)
+        response = json.loads(rv.get_data(as_text=True))
+        self.assertIsNotNone(response["token"])
+
+        return user
+
+    def logout_user(self, display_name="Emilia Clarke", eppn="daeneryst@got.com",
+                                       email="daeneryst@got.com", role="User", password="5t0rmb0r~"):
+        user = self.login_user(display_name=display_name, eppn=eppn,
+                                       email=email, role=role, password=password)
+        rv = self.app.delete('/api/session',
+            content_type="application/json",
+            headers=self.logged_in_headers(user))
+        self.assertSuccess(rv)
+        response = json.loads(rv.get_data(as_text=True))
+        self.assertIsNone(response)
+
         return user

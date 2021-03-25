@@ -51,43 +51,10 @@ class TestLogin(BaseTest):
 
         # No errors occur when this user logs in, and we only have one
         # account with that email address.
-        self.assertEqual(
-            1, len(
-                User.query.filter(User.email == 'ehb11@virginia.edu').all()))
+        self.assertEqual(1, len(User.query.filter(User.email == 'ehb11@virginia.edu').all()))
 
-    def test_login_user(self, display_name="Kit Harington", eppn="jonsnow@got.com",
-                                       email="jonsnow@got.com", role="User", password="y0ukn0wn0th!ng"):
-        user = self.test_create_user_with_password(display_name=display_name, eppn=eppn,
-                                       email=email, role=role, password=password)
-        data = {"email": email, "password": password}
+    def test_login_user(self):
+        self.login_user()
 
-        # Login shouldn't work with email not yet verified
-        rv = self.app.post(
-            '/api/login_password',
-            data=json.dumps(data),
-            content_type="application/json")
-        self.assertEqual(400, rv.status_code)
-
-        user.email_verified = True
-        rv = self.app.post(
-            '/api/login_password',
-            data=json.dumps(data),
-            content_type="application/json")
-        self.assertSuccess(rv)
-        response = json.loads(rv.get_data(as_text=True))
-        self.assertIsNotNone(response["token"])
-
-        return user
-
-    def test_logout_user(self, display_name="Emilia Clarke", eppn="daeneryst@got.com",
-                                       email="daeneryst@got.com", role="User", password="5t0rmb0r~"):
-        user = self.test_login_user(display_name=display_name, eppn=eppn,
-                                       email=email, role=role, password=password)
-        rv = self.app.delete('/api/session',
-            content_type="application/json",
-            headers=self.logged_in_headers(user))
-        self.assertSuccess(rv)
-        response = json.loads(rv.get_data(as_text=True))
-        self.assertIsNone(response)
-
-        return user
+    def test_logout_user(self):
+        self.logout_user()

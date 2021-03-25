@@ -8,7 +8,7 @@ from app.models import EmailLog
 class TestSendEmails(BaseTest):
     def test_register_sends_email(self):
         message_count = len(TEST_MESSAGES)
-        self.test_create_user_with_password()
+        self.create_user_with_password()
         self.assertGreater(len(TEST_MESSAGES), message_count)
         self.assertEqual("iTHRIV: Confirm Email",
                          self.decode(TEST_MESSAGES[-1]['subject']))
@@ -18,7 +18,7 @@ class TestSendEmails(BaseTest):
 
     def test_forgot_password_sends_email(self, display_name="Gemma Whelan", eppn="yara-greyjoy@got.com",
                                        email="yara-greyjoy@got.com", role="User", password="AshaKraken"):
-        user = self.test_create_user_with_password(display_name=display_name, eppn=eppn,
+        user = self.create_user_with_password(display_name=display_name, eppn=eppn,
                                        email=email, role=role, password=password)
         message_count = len(TEST_MESSAGES)
         data = {"email": user.email}
@@ -37,7 +37,7 @@ class TestSendEmails(BaseTest):
     def test_consult_request_sends_email(self):
         # This test will send two emails. One confirming
         # that the user is created:
-        user = self.test_create_user_with_password()
+        user = self.create_user_with_password()
         message_count = len(TEST_MESSAGES)
         data = {"user_id": user.id}
         # ...And a second email requesting the consult:

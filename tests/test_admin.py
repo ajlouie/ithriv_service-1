@@ -19,7 +19,7 @@ class TestAdmin(BaseTest):
         self.assertSuccess(rv)
 
     def test_admin_update_user(self):
-        user = self.test_create_user_with_password()
+        user = self.create_user_with_password()
         user.name = "The Artist Formerly Known As Prince"
         rv = self.app.put(
             '/api/user/%i' % user.id,
