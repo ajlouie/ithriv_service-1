@@ -1,4 +1,5 @@
 import datetime
+import enum
 import re
 
 import jwt
@@ -350,3 +351,65 @@ class Filter():
     def __init__(self, field, value):
         self.field = field
         self.value = value
+
+
+class NotificationStatus(enum.Enum):
+    unread = 'unread'
+    read = 'read'
+    action_taken = 'action_taken'
+
+
+# Re-usable list of actions a user can take in response to a notification
+# Examples:
+# - Signing an agreement
+# - Approving another user's request
+# - Confirming upload or download of HSD
+class NotificationAction(db.Model):
+    __tablename__ = 'notification_action'
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String)
+    date_created = db.Column(db.DateTime, default=datetime.datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.datetime.now)
+    title = db.Column(db.String)
+    description = db.Column(db.String)
+    url = db.Column(db.String)
+
+
+class Notification(db.Model):
+    __tablename__ = 'notification'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String)
+    description = db.Column(db.String)
+    date_created = db.Column(db.DateTime, default=datetime.datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.datetime.now)
+    expiration_date = db.Column(db.DateTime, nullable=True)
+
+    # list of NotificationAction sent to user
+    actions = db.relationship('NotificationActionSent', uselist=True, backref='notification')
+
+    # id of user receiving notification
+    user_id = db.Column(db.Integer, db.ForeignKey('ithriv_user.id'))
+    status = db.Column(db.Enum(NotificationStatus), default=NotificationStatus.unread)
+
+    # NotificationAction taken by user
+    action_taken = db.relationship('NotificationActionTaken', backref='notification')
+
+
+# NotificationActions sent to user (i.e., list of possible actions user can take)
+# Association (a.k.a. Bridge) table relating Notifications to NotificationActions
+class NotificationActionSent(db.Model):
+    __tablename__ = 'notification_action_sent'
+    id = db.Column(db.Integer, primary_key=True)
+    notification_id = db.Column(db.Integer, db.ForeignKey('notification.id'))
+    notification_action_id = db.Column(db.Integer, db.ForeignKey('notification_action.id'))
+    date_notification_sent = db.Column(db.DateTime, default=datetime.datetime.now)
+
+
+# NotificationAction taken by user
+# Association (a.k.a. Bridge) table relating Notifications to NotificationAction
+class NotificationActionTaken(db.Model):
+    __tablename__ = 'notification_action_taken'
+    id = db.Column(db.Integer, primary_key=True)
+    notification_id = db.Column(db.Integer, db.ForeignKey('notification.id'), nullable=True)
+    notification_action_id = db.Column(db.Integer, db.ForeignKey('notification_action.id'), nullable=True)
+    date_action_taken = db.Column(db.DateTime, default=datetime.datetime.now)

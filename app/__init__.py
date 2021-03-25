@@ -23,6 +23,7 @@ from app.file_server import FileServer
 from app.rest_exception import RestException
 
 app = Flask(__name__, instance_relative_config=True)
+""":type: flask.app.Flask"""
 
 # Load the configuration from the instance folder
 app.config.from_pyfile('settings.py')
@@ -44,9 +45,11 @@ logger = logging.getLogger('sqlalchemy.engine')
 logger.setLevel(app.config['SQLALCHEMY_LOG_LEVEL'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+""":type: sqlalchemy.orm.SQLAlchemy"""
 
 # Flask-Marshmallow provides HATEOAS links
 ma = Marshmallow(app)
+""":type: flask_marshmallow.Marshmallow"""
 
 # Database Migrations
 migrate = Migrate(app, db)
