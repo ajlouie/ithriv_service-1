@@ -14,13 +14,13 @@ SQLALCHEMY_DATABASE_URI = "postgresql://ed_user:ed_pass@localhost/ithriv_test"
 # Elastic Search Settings
 ELASTIC_SEARCH = {
     "index_prefix": "ithriv_test",
-    "hosts": ["localhost"],
-    "port": 9200,
     "timeout": 20,
     "verify_certs": False,
     "use_ssl": False,
-    "http_auth_user": "",
-    "http_auth_pass": ""
+    'hosts': conn_info["ELASTIC_SEARCH"]["HOSTS"],
+    'port': conn_info["ELASTIC_SEARCH"]["PORT"],
+    'http_auth_user': conn_info["ELASTIC_SEARCH"]["CLIENT_ID"],
+    'http_auth_pass': conn_info["ELASTIC_SEARCH"]["CLIENT_SECRET"],
 }
 
 # SMTP Email Settings

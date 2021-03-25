@@ -15,9 +15,17 @@ import quopri
 import re
 import unittest
 
-from app import app, db, elastic_index
+from app import app, db, elastic_index, data_loader
 from app.models import Availability, UploadedFile, ThrivSegment, Category, Favorite, ThrivResource, ThrivType, \
     ThrivInstitution, User
+
+
+def clean_db(database):
+    database.session.commit()
+
+    for table in reversed(database.metadata.sorted_tables):
+        database.session.execute(table.delete())
+        database.session.commit()
 
 
 class BaseTest(unittest.TestCase):
@@ -35,24 +43,25 @@ class BaseTest(unittest.TestCase):
         cls.app = app.test_client()
         cls.ctx.push()
         db.create_all()
+        data_loader.DataLoader().build_index()
 
     @classmethod
     def tearDownClass(cls):
-        cls.ctx.pop()
         db.drop_all()
-        pass
+        db.session.remove()
+        data_loader.DataLoader().clear_index()
 
     def setUp(self):
-        db.create_all()
-        self.app = app.test_client()
-        self.ctx = app.test_request_context()
+        db.session.flush()
         self.ctx.push()
+        clean_db(db)
+        data_loader.DataLoader().clear_index()
+        self.auths = {}
 
     def tearDown(self):
+        db.session.rollback()
         self.ctx.pop()
-        elastic_index.clear()
-        db.session.remove()
-        db.drop_all()
+        db.session.flush()
 
     def assertSuccess(self, rv):
         try:
@@ -90,14 +99,12 @@ class BaseTest(unittest.TestCase):
         return db_user
 
     def construct_admin_user(self,
-                             id=1138,
                              eppn="general.organa@rebels.org",
                              display_name="General Organa",
                              email="general.organa@rebels.org",
                              role="Admin",
                              institution=None):
         u = User(
-            id=id,
             eppn=eppn,
             display_name=display_name,
             email=email,
@@ -110,7 +117,14 @@ class BaseTest(unittest.TestCase):
         db.session.commit()
 
         db_user = db.session.query(User).filter_by(eppn=u.eppn).first()
+        self.assertIsNotNone(db_user)
+        self.assertIsNotNone(db_user.id)
         self.assertEqual(db_user.display_name, u.display_name)
+        self.assertEqual(db_user.role, 'Admin')
+
+        if institution:
+            self.assertEqual(db_user.institution_id, institution.id)
+
         return db_user
 
     def construct_various_users(self):
@@ -149,9 +163,11 @@ class BaseTest(unittest.TestCase):
             self,
             name="School for Exceptionally Talented Mynocks",
             domain="asete.edu",
-            description="The asteroid's premiere exogorth parasite education"):
+            description="The asteroid's premiere exogorth parasite education",
+            hide_availability=False,
+    ):
         institution = ThrivInstitution(
-            name=name, domain=domain, description=description)
+            name=name, domain=domain, description=description, hide_availability=hide_availability)
 
         # Check database for existing institution
         existing_inst = db.session \
@@ -173,6 +189,14 @@ class BaseTest(unittest.TestCase):
         self.assertIsNotNone(db_inst.id)
         return db_inst
 
+    def construct_type(self, name='Resource'):
+        new_type = ThrivType(name=name)
+        db.session.add(new_type)
+        db_type = db.session.query(ThrivType).filter_by(name=name).first()
+        self.assertIsNotNone(db_type)
+        self.assertIsNotNone(db_type.id)
+        return db_type
+
     def construct_segment(self, name='Resource'):
         segment = ThrivSegment(name=name)
         db.session.add(segment)
@@ -182,7 +206,7 @@ class BaseTest(unittest.TestCase):
         return db_segment
 
     def construct_resource(self,
-                           type="Starfighter",
+                           type_name="Starfighter",
                            institution=None,
                            name="T-70 X-Wing",
                            description="Small. Fast. Blows stuff up.",
@@ -196,9 +220,9 @@ class BaseTest(unittest.TestCase):
                            approved='Unapproved',
                            private=False,
                            segment_name='Resource'):
-        type_obj = ThrivType(name=type)
+        type_obj = self.construct_type(type_name)
 
-        if available_to is not None:
+        if institution is None and available_to is not None:
             institution = self.construct_institution(name=available_to)
 
         segment = self.construct_segment(name=segment_name)
@@ -219,15 +243,23 @@ class BaseTest(unittest.TestCase):
             segment_id=segment.id,
         )
         db.session.add(resource)
+        db.session.commit()
 
         if available_to is not None:
             availability = Availability(
-                resource_id=resource.id, institution=institution, available=True)
+                resource_id=resource.id, institution_id=institution.id, available=True)
             db.session.add(availability)
-        db.session.commit()
+            db.session.commit()
+
+            db_availability = db.session.query(Availability).filter_by(resource_id=resource.id).first()
+            self.assertIsNotNone(db_availability)
+            self.assertIsNotNone(db_availability.id)
+            self.assertEqual(db_availability.institution_id, institution.id)
+
 
         db_resource = db.session.query(ThrivResource).filter_by(name=name).first()
         self.assertIsNotNone(db_resource)
+        self.assertIsNotNone(db_resource.id)
 
         elastic_index.add_resource(db_resource)
         return db_resource
@@ -367,7 +399,6 @@ class BaseTest(unittest.TestCase):
         # If no user is provided, generate a dummy Admin user
         if not user:
             user = User(
-                id=7,
                 eppn=self.admin_eppn,
                 display_name="Admin",
                 email=self.admin_eppn,

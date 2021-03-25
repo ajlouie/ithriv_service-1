@@ -78,7 +78,7 @@ class TestSearch(BaseTest):
 
     def test_search_filters(self):
         r = self.construct_resource(
-            type="hgttg",
+            type_name="hgttg",
             description="There is a theory which "
                         "states that if ever anyone discovers exactly what "
                         "the Universe is for and why it is here, it will "
@@ -92,7 +92,7 @@ class TestSearch(BaseTest):
 
     def test_search_filter_on_approval(self):
         r = self.construct_resource(
-            type="Woods",
+            type_name="Woods",
             description="A short trip on the river.",
             approved="Approved")
         data = {
@@ -107,7 +107,7 @@ class TestSearch(BaseTest):
 
     def test_search_facet_counts(self):
         r1 = self.construct_resource(
-            type="hgttg",
+            type_name="hgttg",
             name="Golgafrinchan Ark Fleet Ship B",
             description="There is a theory which states that if ever "
                         "anyone discovers exactly what the Universe is "
@@ -117,7 +117,7 @@ class TestSearch(BaseTest):
                         "theory which states that this has already "
                         "happened.")
         r2 = self.construct_resource(
-            type="brazil",
+            type_name="brazil",
             name="Spoor and Dowser",
             description="Information Transit got the wrong man. I got the "
                         "*right* man. The wrong one was delivered to me "

@@ -82,7 +82,7 @@ class TestAdmin(BaseTest):
         }
         response = self.searchUsers(query)
         self.assertEqual(2, len(response['items']))
-        self.assertEqual(3, response['total'])
+        self.assertEqual(4, response['total'])
         self.assertEqual('Big Bird', response['items'][0]['display_name'])
 
         query['pageNumber'] = 1

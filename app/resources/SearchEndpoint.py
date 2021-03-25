@@ -30,12 +30,18 @@ class SearchEndpoint(flask_restful.Resource):
             if resource is not None:
                 resources.append(resource)
                 filterredResults.append(hit)
-                if resource.user_may_view():
+                # if resource.user_may_view():
+                #     print(resource.id, ': ', resource.name,
+                #           ' : ', resource.user_may_view())
+                # else:
+                #     print(resource.id, ': ', resource.name,
+                #           ' : ', resource.user_may_view())
+                if resource.user_may_view:
                     print(resource.id, ': ', resource.name,
-                          ' : ', resource.user_may_view())
+                          ' : ', resource.user_may_view)
                 else:
                     print(resource.id, ': ', resource.name,
-                          ' : ', resource.user_may_view())
+                          ' : ', resource.user_may_view)
 
         search.total = results.hits.total
         search.resources = ThrivResourceSchema().dump(

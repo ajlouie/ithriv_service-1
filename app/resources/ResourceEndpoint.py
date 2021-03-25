@@ -35,7 +35,7 @@ class ResourceEndpoint(flask_restful.Resource):
     def delete(self, id):
         resource = db.session.query(ThrivResource).filter(
             ThrivResource.id == id).first()
-        if resource.user_may_edit():
+        if resource is not None and resource.user_may_edit():
             try:
                 elastic_index.remove_resource(resource)
             except:
@@ -57,6 +57,7 @@ class ResourceEndpoint(flask_restful.Resource):
             request_data['starts'] = request_data['event_date'][0]
             request_data['ends'] = request_data['event_date'][1]
         instance = db.session.query(ThrivResource).filter_by(id=id).first()
+        # if instance.user_may_edit:
         if instance.user_may_edit():
             updated, errors = ThrivResourceSchema().load(request_data, instance=instance)
             if errors:

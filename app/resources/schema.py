@@ -141,8 +141,9 @@ class ThrivResourceSchema(ModelSchema):
     resource_categories = fields.Nested(
         CategoriesOnResourceSchema(), many=True, dump_only=True)
     files = fields.Nested(FileSchema(), many=True, dump_only=True)
-    user_may_view = fields.Boolean(allow_none=True)
-    user_may_edit = fields.Boolean(allow_none=True)
+    owners = fields.Method('get_owners', dump_only=True)
+    user_may_view = fields.Method('get_user_may_view', dump_only=True)
+    user_may_edit = fields.Method('get_user_may_edit', dump_only=True)
     _links = ma.Hyperlinks({
         'self': ma.URLFor('api.resourceendpoint', id='<id>'),
         'collection': ma.URLFor('api.resourcelistendpoint'),
@@ -152,6 +153,26 @@ class ThrivResourceSchema(ModelSchema):
         'availability': ma.UrlFor('api.resourceavailabilityendpoint', resource_id='<id>')
     },
         dump_only=True)
+
+    def get_owners(self, obj):
+        if callable(obj.owners):
+            return obj.owners() if isinstance(obj, ThrivResource) else []
+        else:
+            return obj.owners
+
+    def get_user_may_view(self, obj):
+        if callable(obj.user_may_view):
+            return obj.user_may_view() if isinstance(obj, ThrivResource) else False
+        else:
+            return obj.user_may_view
+
+    def get_user_may_edit(self, obj):
+        if callable(obj.user_may_edit):
+            return obj.user_may_edit() if isinstance(obj, ThrivResource) else False
+        else:
+            return obj.user_may_edit
+
+
 
 
 class CategorySchema(ModelSchema):
