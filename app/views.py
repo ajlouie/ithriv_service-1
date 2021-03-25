@@ -24,6 +24,8 @@ from app.resources.ConsultRequest import consult_blueprint
 from app.resources.TypeEndpoint import TypeEndpoint, TypeListEndpoint, SegmentListEndpoint
 from app.resources.UserEndpoint import UserEndpoint, UserListEndpoint
 from app.resources.FavoriteEndpoint import UserFavoriteEndpoint, FavoriteEndpoint, FavoriteListEndpoint
+from app.resources.NotificationEndpoint import NotificationEndpoint, NotificationActionEndpoint, \
+    NotificationListEndpoint
 
 
 class IThrivApi(flask_restful.Api):
@@ -46,34 +48,42 @@ app.register_blueprint(approval_blueprint)
 parser = flask_restful.reqparse.RequestParser()
 parser.add_argument('resource')
 
-endpoints = [(ResourceListEndpoint, '/resource'),
-             (ResourceEndpoint, '/resource/<id>'),
-             (CategoryByResourceEndpoint, '/resource/<resource_id>/category'),
-             (CategoryListEndpoint, '/category'),
-             (CategoryEndpoint, '/category/<id>'),
-             (RootCategoryListEndpoint, '/category/root'),
-             (ResourceByCategoryEndpoint, '/category/<category_id>/resource'),
-             (InstitutionEndpoint, '/institution/<id>'),
-             (InstitutionListEndpoint, '/institution'),
-             (InstitutionAvailabilityListEndpoint,
-              '/institution/availability'), (TypeEndpoint, '/type/<id>'),
-             (TypeListEndpoint, '/type'), (SearchEndpoint, '/search'),
-             (SegmentListEndpoint, '/segment'),
-             (ResourceCategoryListEndpoint, '/resource_category'),
-             (ResourceCategoryEndpoint, '/resource_category/<id>'),
-             (AvailabilityListEndpoint, '/availability'),
-             (AvailabilityEndpoint, '/availability/<id>'),
-             (ResourceAvailabilityEndpoint,
-              '/resource/<resource_id>/availability'),
-             (IconListEndpoint, '/icon'), (IconEndpoint, '/icon/<id>'),
-             (UserListEndpoint, '/user'), (UserEndpoint, '/user/<id>'),
-             (SessionEndpoint, '/session'),
-             (SessionStatusEndpoint, '/session_status'),
-             (FavoriteListEndpoint, '/favorite'),
-             (FavoriteEndpoint, '/favorite/<id>'),
-             (UserFavoriteEndpoint, '/session/favorite'),
-             (UserResourceEndpoint, '/session/resource'),
-             (FileEndpoint, '/file/<id>'), (FileListEndpoint, '/file')]
+endpoints = [
+    (ResourceListEndpoint, '/resource'),
+    (ResourceEndpoint, '/resource/<id>'),
+    (CategoryByResourceEndpoint, '/resource/<resource_id>/category'),
+    (CategoryListEndpoint, '/category'),
+    (CategoryEndpoint, '/category/<id>'),
+    (RootCategoryListEndpoint, '/category/root'),
+    (ResourceByCategoryEndpoint, '/category/<category_id>/resource'),
+    (InstitutionEndpoint, '/institution/<id>'),
+    (InstitutionListEndpoint, '/institution'),
+    (InstitutionAvailabilityListEndpoint, '/institution/availability'),
+    (TypeEndpoint, '/type/<id>'),
+    (TypeListEndpoint, '/type'),
+    (SearchEndpoint, '/search'),
+    (SegmentListEndpoint, '/segment'),
+    (ResourceCategoryListEndpoint, '/resource_category'),
+    (ResourceCategoryEndpoint, '/resource_category/<id>'),
+    (AvailabilityListEndpoint, '/availability'),
+    (AvailabilityEndpoint, '/availability/<id>'),
+    (ResourceAvailabilityEndpoint, '/resource/<resource_id>/availability'),
+    (IconListEndpoint, '/icon'),
+    (IconEndpoint, '/icon/<id>'),
+    (UserListEndpoint, '/user'),
+    (UserEndpoint, '/user/<id>'),
+    (SessionEndpoint, '/session'),
+    (SessionStatusEndpoint, '/session_status'),
+    (FavoriteListEndpoint, '/favorite'),
+    (FavoriteEndpoint, '/favorite/<id>'),
+    (UserFavoriteEndpoint, '/session/favorite'),
+    (UserResourceEndpoint, '/session/resource'),
+    (FileEndpoint, '/file/<id>'),
+    (FileListEndpoint, '/file'),
+    (NotificationListEndpoint, '/notification'),
+    (NotificationEndpoint, '/notification/<notification_id>'),
+    (NotificationActionEndpoint, '/notification/<notification_id>/action/<action_id>'),
+]
 
 
 @app.route('/', methods=['GET'])
