@@ -353,7 +353,7 @@ class Filter():
         self.value = value
 
 
-class NotificationStatus(enum.Enum):
+class NotificationStatus(str, enum.Enum):
     unread = 'unread'
     read = 'read'
     action_taken = 'action_taken'
@@ -385,14 +385,14 @@ class Notification(db.Model):
     expiration_date = db.Column(db.DateTime, nullable=True)
 
     # list of NotificationAction sent to user
-    actions = db.relationship('NotificationActionSent', uselist=True, backref='notification')
+    actions = db.relationship('NotificationActionSent', uselist=True, backref='notification_action')
 
     # id of user receiving notification
     user_id = db.Column(db.Integer, db.ForeignKey('ithriv_user.id'))
     status = db.Column(db.Enum(NotificationStatus), default=NotificationStatus.unread)
 
     # NotificationAction taken by user
-    action_taken = db.relationship('NotificationActionTaken', backref='notification')
+    action_taken = db.relationship('NotificationActionTaken', uselist=False, backref='notification_action')
 
 
 # NotificationActions sent to user (i.e., list of possible actions user can take)
@@ -410,6 +410,6 @@ class NotificationActionSent(db.Model):
 class NotificationActionTaken(db.Model):
     __tablename__ = 'notification_action_taken'
     id = db.Column(db.Integer, primary_key=True)
-    notification_id = db.Column(db.Integer, db.ForeignKey('notification.id'), nullable=True)
-    notification_action_id = db.Column(db.Integer, db.ForeignKey('notification_action.id'), nullable=True)
+    notification_id = db.Column(db.Integer, db.ForeignKey('notification.id'), unique=True, nullable=False)
+    notification_action_id = db.Column(db.Integer, db.ForeignKey('notification_action.id'), nullable=False)
     date_action_taken = db.Column(db.DateTime, default=datetime.datetime.now)

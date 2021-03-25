@@ -3,7 +3,7 @@ from marshmallow import fields, post_load
 from sqlalchemy import func
 
 from app import ma, db
-from app.models import Availability
+from app.models import Availability, Notification, NotificationAction, NotificationActionSent, NotificationActionTaken
 from app.models import Category
 from app.models import Icon
 from app.models import ThrivInstitution
@@ -173,8 +173,6 @@ class ThrivResourceSchema(ModelSchema):
             return obj.user_may_edit
 
 
-
-
 class CategorySchema(ModelSchema):
     """Provides detailed information about a category, including all the children"""
     class Meta:
@@ -323,3 +321,33 @@ class UserSearchSchema(ma.Schema):
     pages = fields.Integer()
     total = fields.Integer()
     items = ma.List(ma.Nested(UserSchema))
+
+
+class NotificationActionSchema(ModelSchema):
+    class Meta:
+        model = NotificationAction
+        fields = ('id', 'type', 'date_created', 'last_updated', 'title', 'description', 'url')
+
+
+class NotificationActionSentSchema(ModelSchema):
+    class Meta:
+        model = NotificationActionSent
+        fields = ('id', 'notification_id', 'notification_action_id', 'date_notification_sent', 'notification_action')
+    notification_action = fields.Nested(NotificationActionSchema(), dump_only=True)
+
+
+class NotificationActionTakenSchema(ModelSchema):
+    class Meta:
+        model = NotificationActionTaken
+        fields = ('id', 'notification_id', 'notification_action_id', 'date_action_taken', 'notification_action')
+    notification_action = fields.Nested(NotificationActionSchema(), dump_only=True)
+
+
+class NotificationSchema(ModelSchema):
+    class Meta:
+        model = Notification
+        fields = ('id', 'title', 'description', 'date_created', 'last_updated', 'expiration_date',
+                  'actions', 'user_id', 'status', 'action_taken')
+    actions = fields.List(fields.Nested(NotificationActionSentSchema()), dump_only=True)
+    action_taken = fields.Nested(NotificationActionTakenSchema(), dump_only=True, allow_none=True)
+
