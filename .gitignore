@@ -9,3 +9,4 @@ env
 /env39/
 .idea
 .run
+tests/.pytest_cache
