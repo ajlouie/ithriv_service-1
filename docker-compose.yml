@@ -37,7 +37,7 @@ services:
     environment:
       - POSTGRES_USER=ed_user
       - POSTGRES_PASSWORD=ed_pass
-      - POSTGRES_MULTIPLE_DATABASES="ithriv-local"
+      - POSTGRES_MULTIPLE_DATABASES="ithriv-local",ithriv_test
     container_name: ithriv_db
     ports:
       - 5432:5432
