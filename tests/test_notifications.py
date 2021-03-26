@@ -102,3 +102,137 @@ class TestNotifications(BaseTest):
         self.assertIsNotNone(response_after_action['action_taken'])
         self.assertEqual(response_after_action['action_taken']['notification_action_id'], a1.id)
 
+    def test_admin_add_and_update_notification_actions(self):
+        admin_user = self.construct_admin_user()
+
+        url = f'/api/notification_action'
+        rv_all_before_add = self.app.get(
+            url,
+            follow_redirects=True,
+            headers=self.logged_in_headers(user=admin_user),
+            content_type="application/json")
+        self.assertSuccess(rv_all_before_add)
+        response_all_before_add = json.loads(rv_all_before_add.get_data(as_text=True))
+        num_actions_before = len(response_all_before_add)
+
+        # Add 2 actions directly to the database.
+        a1 = self.construct_action(title='a1', action_type='Approve')
+        a2 = self.construct_action(title='a2', action_type='Deny')
+
+        rv_all_after_db_add = self.app.get(
+            url,
+            follow_redirects=True,
+            headers=self.logged_in_headers(user=admin_user),
+            content_type="application/json")
+        self.assertSuccess(rv_all_after_db_add)
+        response_all_after_db_add = json.loads(rv_all_after_db_add.get_data(as_text=True))
+        num_after_db_add = len(response_all_after_db_add)
+        self.assertEqual(num_after_db_add, num_actions_before + 2)
+
+        # Add an action via the endpoint
+        a3_dict = {
+            'title': 'Storm the castle',
+            'description': 'Buttercup is marry Humperdinck in little less than half an hour.',
+            'url': 'https://wuv.twoo.wuv',
+            'type': 'Edit',
+        }
+        rv_after_add = self.app.put(
+            url,
+            data=json.dumps(a3_dict),
+            content_type="application/json",
+            headers=self.logged_in_headers(user=admin_user),
+            follow_redirects=True,
+
+        )
+        self.assertSuccess(rv_after_add)
+        response_after_add = json.loads(rv_after_add.get_data(as_text=True))
+        self.assertEqual(response_after_add['title'], a3_dict['title'])
+        self.assertEqual(response_after_add['description'], a3_dict['description'])
+        self.assertEqual(response_after_add['url'], a3_dict['url'])
+        self.assertEqual(response_after_add['type'], a3_dict['type'])
+        self.assertIsNotNone(response_after_add['id'])
+        a3_id = response_after_add['id']
+
+        # There should be one more action now.
+        rv_all_after_add = self.app.get(
+            url,
+            follow_redirects=True,
+            headers=self.logged_in_headers(user=admin_user),
+            content_type="application/json")
+        self.assertSuccess(rv_all_after_add)
+        response_all_after_add = json.loads(rv_all_after_add.get_data(as_text=True))
+        num_after_add = len(response_all_after_add)
+        self.assertEqual(num_after_add, num_after_db_add + 1)
+
+        # Edit action via the endpoint.
+        url_action = url + f'/{a3_id}'
+        a3_dict['description'] = 'So all we have to do is get in, break up the wedding, steal the princess, ' \
+                                 'make our escape... after I kill Count Rugen.'
+        rv_after_edit = self.app.post(
+            url_action,
+            data=json.dumps(a3_dict),
+            content_type="application/json",
+            headers=self.logged_in_headers(user=admin_user),
+            follow_redirects=True
+        )
+        self.assertSuccess(rv_after_edit)
+        response_after_edit = json.loads(rv_after_edit.get_data(as_text=True))
+        self.assertEqual(response_after_edit['title'], a3_dict['title'])
+        self.assertEqual(response_after_edit['description'], a3_dict['description'])
+
+        # The total number of actions should be the same.
+        rv_all_after_edit = self.app.get(
+            url,
+            follow_redirects=True,
+            headers=self.logged_in_headers(user=admin_user),
+            content_type="application/json")
+        self.assertSuccess(rv_all_after_edit)
+        response_all_after_edit = json.loads(rv_all_after_edit.get_data(as_text=True))
+        num_after_edit = len(response_all_after_edit)
+        self.assertEqual(num_after_edit, num_after_add)
+
+    def test_delete_notification_actions(self):
+        admin_user = self.construct_admin_user()
+
+        # Add 2 actions directly to the database.
+        a1 = self.construct_action(title='a1', action_type='Approve')
+        a2 = self.construct_action(title='a2', action_type='Deny')
+
+        url = f'/api/notification_action'
+        rv_all_before_delete = self.app.get(
+            url,
+            follow_redirects=True,
+            headers=self.logged_in_headers(user=admin_user),
+            content_type="application/json")
+        self.assertSuccess(rv_all_before_delete)
+        response_all_before_delete = json.loads(rv_all_before_delete.get_data(as_text=True))
+        num_actions_before = len(response_all_before_delete)
+
+        # Delete the first action.
+        url_action = url + f'/{a1.id}'
+        rv_after_delete = self.app.delete(
+            url_action,
+            content_type="application/json",
+            headers=self.logged_in_headers(user=admin_user),
+            follow_redirects=True)
+        self.assertSuccess(rv_after_delete)
+
+        # Should return 404 now for the first action.
+        rv_get_after_delete = self.app.get(
+            url_action,
+            content_type="application/json",
+            headers=self.logged_in_headers(user=admin_user),
+            follow_redirects=True)
+        self.assertEqual(404, rv_get_after_delete.status_code)
+
+        # There should be one fewer actions.
+        rv_all_after_delete = self.app.get(
+            url,
+            follow_redirects=True,
+            headers=self.logged_in_headers(user=admin_user),
+            content_type="application/json")
+        self.assertSuccess(rv_all_after_delete)
+        response_all_after_delete = json.loads(rv_all_after_delete.get_data(as_text=True))
+        num_actions_after = len(response_all_after_delete)
+        self.assertEqual(num_actions_after, num_actions_before - 1)
+

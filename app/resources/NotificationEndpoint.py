@@ -3,7 +3,7 @@ from flask import g, request
 
 from app import auth, RestException
 from app.models import NotificationStatus
-from app.resources.schema import NotificationSchema
+from app.resources.schema import NotificationSchema, NotificationActionSchema
 from app.services.notifications_service import NotificationsService
 
 """Provides a way to get the current user's notifications and take action on them."""
@@ -56,6 +56,72 @@ class NotificationEndpoint(flask_restful.Resource):
             return NotificationSchema().dump(updated_notification)
         else:
             raise RestException(RestException.INVALID_OBJECT)
+
+
+class NotificationActionListEndpoint(flask_restful.Resource):
+    # Get list of all possible notification actions
+    @auth.login_required
+    def get(self):
+        if 'user' not in g and g.user.role != 'Admin':
+            raise RestException(RestException.PERMISSION_DENIED)
+
+        actions = NotificationsService.get_notification_actions(g.user)
+
+        if actions is not None:
+            return NotificationActionSchema(many=True).dump(actions)
+        else:
+            raise RestException(RestException.NOT_FOUND)
+
+    # Add a single action
+    @auth.login_required
+    def put(self):
+        if 'user' not in g and g.user.role != 'Admin':
+            raise RestException(RestException.PERMISSION_DENIED)
+
+        action_dict = request.get_json()
+        action = NotificationsService.add_notification_action(g.user, action_dict)
+
+        if action is not None:
+            return NotificationActionSchema().dump(action)
+        else:
+            raise RestException(RestException.NOT_FOUND)
+
+
+class NotificationActionAdminEndpoint(flask_restful.Resource):
+    # Get one action by ID
+    @auth.login_required
+    def get(self, action_id):
+        if 'user' not in g and g.user.role != 'Admin':
+            raise RestException(RestException.PERMISSION_DENIED)
+
+        actions = NotificationsService.get_action(action_id)
+
+        if actions is not None:
+            return NotificationActionSchema(many=True).dump(actions)
+        else:
+            raise RestException(RestException.NOT_FOUND)
+
+    # Update a single action
+    @auth.login_required
+    def post(self, action_id):
+        if 'user' not in g and g.user.role != 'Admin':
+            raise RestException(RestException.PERMISSION_DENIED)
+
+        action_dict = request.get_json()
+        action = NotificationsService.update_notification_action(g.user, action_id, action_dict)
+
+        if action is not None:
+            return NotificationActionSchema().dump(action)
+        else:
+            raise RestException(RestException.NOT_FOUND)
+
+    # Delete a single action
+    @auth.login_required
+    def delete(self, action_id):
+        if 'user' not in g and g.user.role != 'Admin':
+            raise RestException(RestException.PERMISSION_DENIED)
+
+        NotificationsService.delete_notification_action(g.user, action_id)
 
 
 class NotificationActionEndpoint(flask_restful.Resource):

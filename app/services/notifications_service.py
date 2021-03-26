@@ -3,6 +3,7 @@ from sqlalchemy import desc
 from app import session, RestException
 from app.models import Notification, NotificationActionSent, NotificationAction, NotificationActionTaken, \
     NotificationStatus
+from app.resources.schema import NotificationActionSchema
 
 
 class NotificationsService(object):
@@ -14,8 +15,8 @@ class NotificationsService(object):
 
     @staticmethod
     def is_valid_action(action_id):
-        db_action = NotificationsService.get_action(action_id)
-        return db_action is not None and db_action.id is not None
+        num_actions = session.query(NotificationAction).filter(NotificationAction.id == action_id).count()
+        return num_actions > 0
 
     @staticmethod
     def is_valid_status(status_str):
@@ -42,7 +43,69 @@ class NotificationsService(object):
 
     @staticmethod
     def get_action(action_id):
-        return session.query(NotificationAction).filter(NotificationAction.id == action_id).first()
+        if NotificationsService.is_valid_action(action_id):
+            return session.query(NotificationAction).filter(NotificationAction.id == action_id).first()
+
+    @staticmethod
+    def get_notification_actions(user):
+        if user.role != 'Admin':
+            raise RestException(RestException.PERMISSION_DENIED)
+
+        return session.query(NotificationAction) \
+            .order_by(desc(NotificationAction.title)) \
+            .all()
+
+    @staticmethod
+    def add_notification_action(user, action_dict):
+        if user.role != 'Admin':
+            raise RestException(RestException.PERMISSION_DENIED)
+
+        new_action, errors = NotificationActionSchema().load(data=action_dict)
+        if errors:
+            raise RestException(RestException.INVALID_OBJECT, details=errors)
+        session.add(new_action)
+        session.commit()
+
+        # Return new action by criteria, since we can't guarantee it'll have an ID right away.
+        return session.query(NotificationAction) \
+            .filter(NotificationAction.title == new_action.title) \
+            .filter(NotificationAction.description == new_action.description) \
+            .filter(NotificationAction.type == new_action.type) \
+            .filter(NotificationAction.url == new_action.url) \
+            .order_by(desc(NotificationAction.date_created)) \
+            .first()
+
+    @staticmethod
+    def update_notification_action(user, action_id, action_dict):
+        if user.role != 'Admin':
+            raise RestException(RestException.PERMISSION_DENIED)
+
+        if NotificationsService.is_valid_action(action_id):
+            instance = session.query(NotificationAction).filter(NotificationAction.id == action_id).first()
+            updated_action, errors = NotificationActionSchema().load(data=action_dict, instance=instance)
+            if errors:
+                raise RestException(RestException.INVALID_OBJECT, details=errors)
+            session.add(updated_action)
+            session.commit()
+
+            # Return updated action
+            return NotificationsService.get_action(action_id)
+        else:
+            NotificationsService.raise_invalid_action(action_id=action_id)
+
+    @staticmethod
+    def delete_notification_action(user, action_id):
+        if user.role != 'Admin':
+            raise RestException(RestException.PERMISSION_DENIED)
+
+        if NotificationsService.is_valid_action(action_id):
+            session.query(NotificationAction) \
+                .filter(NotificationAction.id == action_id) \
+                .delete()
+
+            session.commit()
+        else:
+            NotificationsService.raise_invalid_action(action_id=action_id)
 
     @staticmethod
     def get_notification_action_sent(user_id, notification_id, action_id):
@@ -143,11 +206,17 @@ class NotificationsService(object):
         })
 
     @staticmethod
-    def raise_invalid_action(notification_id, action_id):
-        raise RestException({
-            'code': 'invalid_notification_action',
-            'message': f'The action_id {action_id} is not valid for notification_id {notification_id}.'
-        })
+    def raise_invalid_action(notification_id=None, action_id=None):
+        if notification_id is not None:
+            raise RestException({
+                'code': 'invalid_notification_action',
+                'message': f'The action_id {action_id} is not valid for notification_id {notification_id}.'
+            })
+        else:
+            raise RestException({
+                'code': 'invalid_notification_action',
+                'message': f'The action_id {action_id} is not valid.'
+            })
 
     @staticmethod
     def raise_invalid_status(status_str):
