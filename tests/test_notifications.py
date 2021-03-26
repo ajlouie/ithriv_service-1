@@ -1,6 +1,7 @@
 import json
 
 from tests.base_test import BaseTest
+from app.models import NotificationStatus
 
 
 class TestNotifications(BaseTest):
@@ -61,21 +62,43 @@ class TestNotifications(BaseTest):
         response_before = json.loads(rv1.get_data(as_text=True))
         self.assertIsNone(response_before['action_taken'])
 
-        url2 = url + f'/action/{a1.id}'
-        print('url2', url2)
-        rv2 = self.app.post(
-            url2,
+        # Update read/unread status on the notification.
+        self.assertEqual(NotificationStatus.unread, response_before['status'])
+        rv_status = self.app.post(
+            url,
+            data=json.dumps({'status': 'read'}),
             content_type="application/json",
-            headers=self.logged_in_headers(user=user), follow_redirects=True)
-        self.assertSuccess(rv2)
+            headers=self.logged_in_headers(user=user),
+            follow_redirects=True,
 
-        rv3 = self.app.get(
+        )
+        self.assertSuccess(rv_status)
+
+        rv_after_status = self.app.get(
             url,
             follow_redirects=True,
             headers=self.logged_in_headers(user=user),
             content_type="application/json")
-        self.assertSuccess(rv3)
-        response_after = json.loads(rv3.get_data(as_text=True))
-        self.assertIsNotNone(response_after['action_taken'])
-        self.assertEqual(response_after['action_taken']['notification_action_id'], a1.id)
+        self.assertSuccess(rv_after_status)
+        response_after_status = json.loads(rv_after_status.get_data(as_text=True))
+        self.assertEqual(NotificationStatus.read, response_after_status['status'])
+
+        # Take action on the notification.
+        url_action = url + f'/action/{a1.id}'
+        print('url_action', url_action)
+        rv_action = self.app.post(
+            url_action,
+            content_type="application/json",
+            headers=self.logged_in_headers(user=user), follow_redirects=True)
+        self.assertSuccess(rv_action)
+
+        rv_after_action = self.app.get(
+            url,
+            follow_redirects=True,
+            headers=self.logged_in_headers(user=user),
+            content_type="application/json")
+        self.assertSuccess(rv_after_action)
+        response_after_action = json.loads(rv_after_action.get_data(as_text=True))
+        self.assertIsNotNone(response_after_action['action_taken'])
+        self.assertEqual(response_after_action['action_taken']['notification_action_id'], a1.id)
 

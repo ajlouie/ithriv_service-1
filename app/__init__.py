@@ -47,6 +47,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 """:type: sqlalchemy.orm.SQLAlchemy"""
 
+session = db.session
+""":type: sqlalchemy.orm.Session"""
+
 # Flask-Marshmallow provides HATEOAS links
 ma = Marshmallow(app)
 """:type: flask_marshmallow.Marshmallow"""
