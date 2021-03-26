@@ -1,10 +1,10 @@
 import flask_restful
 from flask import g, request
 
-from app import db, auth, RestException
-from app.models import Notification, NotificationActionSent, NotificationActionTaken, NotificationStatus
+from app import auth, RestException
+from app.models import NotificationStatus
 from app.resources.schema import NotificationSchema
-from services.notifications_service import NotificationsService
+from app.services.notifications_service import NotificationsService
 
 """Provides a way to get the current user's notifications and take action on them."""
 
