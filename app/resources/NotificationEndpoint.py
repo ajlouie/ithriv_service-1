@@ -58,6 +58,28 @@ class NotificationEndpoint(flask_restful.Resource):
             raise RestException(RestException.INVALID_OBJECT)
 
 
+class NotificationSendEndpoint(flask_restful.Resource):
+    # Add a notification for a user
+    @auth.login_required
+    def post(self):
+        if 'user' not in g and g.user.role != 'Admin':
+            raise RestException(RestException.PERMISSION_DENIED)
+
+        request_dict = request.get_json()
+        notification = NotificationsService.add_notification_for_user(
+            user_id=request_dict['user_id'],
+            title=request_dict['title'],
+            description=request_dict['description'],
+            expiration_date=request_dict['expiration_date'],
+            action_ids=request_dict['action_ids']
+        )
+
+        if notification is not None:
+            return NotificationActionSchema().dump(notification)
+        else:
+            raise RestException(RestException.NOT_FOUND)
+
+
 class NotificationActionListEndpoint(flask_restful.Resource):
     # Get list of all possible notification actions
     @auth.login_required

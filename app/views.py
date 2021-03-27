@@ -25,7 +25,7 @@ from app.resources.TypeEndpoint import TypeEndpoint, TypeListEndpoint, SegmentLi
 from app.resources.UserEndpoint import UserEndpoint, UserListEndpoint
 from app.resources.FavoriteEndpoint import UserFavoriteEndpoint, FavoriteEndpoint, FavoriteListEndpoint
 from app.resources.NotificationEndpoint import NotificationEndpoint, NotificationActionEndpoint, \
-    NotificationListEndpoint, NotificationActionListEndpoint, NotificationActionAdminEndpoint
+    NotificationListEndpoint, NotificationActionListEndpoint, NotificationActionAdminEndpoint, NotificationSendEndpoint
 
 
 class IThrivApi(flask_restful.Api):
@@ -85,6 +85,7 @@ endpoints = [
     (NotificationActionEndpoint, '/notification/<notification_id>/action/<action_id>'),
     (NotificationActionListEndpoint, '/notification_action'),
     (NotificationActionAdminEndpoint, '/notification_action/<action_id>'),
+    (NotificationSendEndpoint, '/notification_send'),
 ]
 
 
