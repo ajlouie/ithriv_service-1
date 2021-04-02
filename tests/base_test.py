@@ -17,7 +17,7 @@ import unittest
 
 from app import app, db, elastic_index, data_loader
 from app.models import Availability, UploadedFile, ThrivSegment, Category, Favorite, ThrivResource, ThrivType, \
-    ThrivInstitution, User, Notification, NotificationStatus, NotificationAction, NotificationActionSent
+    ThrivInstitution, User
 
 
 def clean_db(database):
@@ -331,66 +331,6 @@ class BaseTest(unittest.TestCase):
         db.session.add(favorite)
         db.session.commit()
         return favorite
-
-    def construct_action(self, title="Die", description="You can die too, for all I care!",
-                         action_type="Deny", url="https://as.you.wish.edu"):
-        action = NotificationAction(title=title, description=description, type=action_type, url=url)
-        db.session.add(action)
-        db.session.commit()
-
-        db_action = db.session.query(NotificationAction)\
-            .filter(NotificationAction.title == title)\
-            .filter(NotificationAction.description == description)\
-            .first()
-
-        self.assertIsNotNone(db_action)
-        self.assertIsNotNone(db_action.id)
-
-        return db_action
-
-    def construct_notification(self, title="No more rhymes now, I mean it!",
-                               description="Anybody want a peanut?", user=None, actions=None):
-        if user is None:
-            user = self.construct_user()
-
-        if actions is None:
-            action1 = self.construct_action(
-                title="Blave",
-                description="To blave means to bluff. So you're probably playing cards, and he cheated.",
-                action_type="Deny",
-                url="https://liar.liar.liiaaarrr.gov"
-            )
-            action2 = self.construct_action(
-                title="Love",
-                description="Sonny, true love is the greatest thing in the world -- except for a nice MLT",
-                action_type="Approve",
-                url="https://humiliations.galore.edu"
-            )
-            actions = [action1, action2]
-
-        notification = Notification(title=title, description=description, user_id=user.id)
-        db.session.add(notification)
-        db.session.commit()
-
-        db_notification = db.session.query(Notification)\
-            .filter(Notification.title == title)\
-            .filter(Notification.description == description)\
-            .filter(Notification.user_id == user.id)\
-            .first()
-
-        self.assertIsNotNone(db_notification)
-        self.assertIsNotNone(db_notification.id)
-        self.assertEqual(db_notification.status, NotificationStatus.unread)
-
-        for action in actions:
-            notification_action_sent = NotificationActionSent(
-                notification_id=db_notification.id,
-                notification_action_id=action.id
-            )
-            db.session.add(notification_action_sent)
-            db.session.commit()
-
-        return db_notification
 
     def search(self, query, user=None):
         """Executes a query as the given user, returning the resulting search results object."""
