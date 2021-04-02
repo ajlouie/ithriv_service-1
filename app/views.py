@@ -24,8 +24,7 @@ from app.resources.ConsultRequest import consult_blueprint
 from app.resources.TypeEndpoint import TypeEndpoint, TypeListEndpoint, SegmentListEndpoint
 from app.resources.UserEndpoint import UserEndpoint, UserListEndpoint
 from app.resources.FavoriteEndpoint import UserFavoriteEndpoint, FavoriteEndpoint, FavoriteListEndpoint
-from app.resources.NotificationEndpoint import NotificationEndpoint, NotificationActionEndpoint, \
-    NotificationListEndpoint, NotificationActionListEndpoint, NotificationActionAdminEndpoint, NotificationSendEndpoint
+from app.resources.CommonsEulaEndpoint import CommonsEulaEndpoint
 
 
 class IThrivApi(flask_restful.Api):
@@ -80,12 +79,7 @@ endpoints = [
     (UserResourceEndpoint, '/session/resource'),
     (FileEndpoint, '/file/<id>'),
     (FileListEndpoint, '/file'),
-    (NotificationListEndpoint, '/notification'),
-    (NotificationEndpoint, '/notification/<notification_id>'),
-    (NotificationActionEndpoint, '/notification/<notification_id>/action/<action_id>'),
-    (NotificationActionListEndpoint, '/notification_action'),
-    (NotificationActionAdminEndpoint, '/notification_action/<action_id>'),
-    (NotificationSendEndpoint, '/notification_send'),
+    (CommonsEulaEndpoint, '/commons_eula'),
 ]
 
 
